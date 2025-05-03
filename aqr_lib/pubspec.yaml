@@ -1,0 +1,23 @@
+name: zxing_lib
+description: Advanced QR.
+version: 1.1.2
+homepage: https://shirne.github.io/
+repository: https://github.com/shirne/zxing-dart
+
+environment:
+  sdk: '>=3.0.0 <4.0.0'
+
+dependencies:
+  intl: '>=0.17.0 <1.0.0'
+  charset: ^2.0.0
+  image: ^4.0.17
+  camera:
+
+dev_dependencies:
+  test:
+  fixnum: ^1.0.1
+  lints:
+  collection:
+# For information on the generic Dart part of this file, see the
+# following page: https://dart.dev/tools/pub/pubspec
+

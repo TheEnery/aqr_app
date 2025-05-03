@@ -1,9 +1,13 @@
-import 'package:aqr/widgets/generator_page.dart';
-import 'package:aqr/widgets/scanner_page.dart';
 import 'package:flutter/material.dart';
+
+import './benchmark.dart';
+import './widgets/generator_page.dart';
+import './widgets/scanner_page.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
+
+  runBenchmarks();
 
   runApp(const AqrApp());
 }

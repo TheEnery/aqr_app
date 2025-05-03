@@ -1,0 +1,60 @@
+{
+  // Use IntelliSense to learn about possible attributes.
+  // Hover to view descriptions of existing attributes.
+  // For more information, visit: https://go.microsoft.com/fwlink/?linkid=830387
+  "version": "0.2.0",
+  "configurations": [
+    {
+      "name": "aqr_app",
+      "request": "launch",
+      "type": "dart",
+      "program": "lib/main.dart"
+    },
+    {
+      "name": "aqr_app (profile mode)",
+      "request": "launch",
+      "type": "dart",
+      "flutterMode": "profile"
+    },
+    {
+      "name": "aqr_app (release mode)",
+      "request": "launch",
+      "type": "dart",
+      "flutterMode": "release"
+    },
+    {
+      "name": "aqr_lib",
+      "cwd": "aqr_lib",
+      "request": "launch",
+      "type": "dart"
+    },
+    {
+      "name": "daaaaamn",
+      "request": "launch",
+      "type": "dart",
+      "program": "daaaaamn.dart",
+      "cwd": "aqr_lib/daaaaamn"
+    },
+    {
+      "name": "generate",
+      "request": "launch",
+      "type": "dart",
+      "program": "generate.dart",
+      "cwd": "aqr_lib/daaamn"
+    },
+    {
+      "name": "hue2",
+      "request": "launch",
+      "type": "dart",
+      "program": "hue2.dart",
+      "cwd": "aqr_lib/daaamn"
+    },
+    {
+      "name": "hue3",
+      "request": "launch",
+      "type": "dart",
+      "program": "hue3.dart",
+      "cwd": "aqr_lib/daaamn"
+    }
+  ]
+}

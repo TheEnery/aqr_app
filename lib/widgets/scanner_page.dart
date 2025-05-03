@@ -1,11 +1,19 @@
 import 'dart:async';
 
-import 'package:camera/camera.dart';
-import 'package:aqr/core/camera_controller_extension.dart';
-import 'package:aqr/widgets/loading_widget.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
-import 'package:image/image.dart' as imglib;
+
+import 'package:camera/camera.dart';
+import 'package:wakelock_plus/wakelock_plus.dart';
+import 'package:zxing_lib/src/core/lrgb_matrix.dart';
+import 'package:zxing_lib/src/decoder/decoder.dart';
+import 'package:zxing_lib/src/decoder/decoder_result.dart';
+
+import '../core/camera_controller_extension.dart';
+import '../core/image_converter.dart';
+import '../widgets/loading_widget.dart';
+
+//import 'file:/home/enery/Documents/aqr/aqr_app/aqr_lib/old_lib/aqr_core.dart';
 
 class ScannerPage extends StatefulWidget {
   const ScannerPage({super.key});
@@ -19,20 +27,25 @@ class _ScannerPageState extends State<ScannerPage> {
   CameraController? _controller;
   int _currentCameraIndex = 0;
   bool _enableTorch = false;
-  final _scanDelayMs = 2000;
+  //Result? _result;
+  DecoderResult? _result;
+  final _scanDelayMs = 0;
   StreamSubscription? _scanSubscription;
 
   @override
   void initState() {
     super.initState();
 
+    WakelockPlus.enable();
     _initialize();
   }
 
   @override
   void dispose() {
-    _controller?.dispose();
-    _scanSubscription?.cancel();
+    _scanSubscription?.cancel().then((_) {
+      _controller?.dispose();
+    });
+    WakelockPlus.disable();
 
     super.dispose();
   }
@@ -99,32 +112,55 @@ class _ScannerPageState extends State<ScannerPage> {
     setState(() {});
   }
 
-  Stream<imglib.Image> _scanning() async* {
+  Stream _scanning() async* {
     while (true) {
-      final result = await Future.delayed(
+      await Future.delayed(
         Duration(milliseconds: _scanDelayMs),
         () async {
           final image = await _controller!.inMemoryImage();
-          final result = await compute((image) {
-            return image;
-          }, image);
-          return result;
+
+          _result = await compute(
+            (params) {
+              //Result? result;
+              DecoderResult? result;
+              try {
+                // final image = ImageConverter.convertCameraImage(params.image);
+                // result = QrCode().decode(image);
+                result =
+                    Decoder().decode(LrgbMatrix.fromCameraImage(params.image));
+              } on Exception catch (e, s) {
+                debugPrintStack(stackTrace: s, label: e.toString());
+              } on Error catch (e, s) {
+                debugPrintStack(stackTrace: s, label: 'Daaamn ${e.toString()}');
+              }
+              return result;
+            },
+            _ComputationInput(
+              image: image,
+            ),
+          );
         },
       );
-      yield result;
+      yield null;
     }
   }
 
   void _subscribeToScan() {
     _scanSubscription = _scanning().listen(
       (event) {
+        final context = this.context;
         if (!context.mounted) return;
-        showDialog(
-          context: context,
-          builder: (context) {
-            return Image.memory(imglib.encodeBmp(event));
-          },
-        );
+        ScaffoldMessenger.maybeOf(context)
+          ?..clearSnackBars()
+          ..showSnackBar(
+            SnackBar(
+              content: Column(
+                children: [
+                  Text(_result?.text ?? 'No content'),
+                ],
+              ),
+            ),
+          );
       },
     );
   }
@@ -147,4 +183,12 @@ class _ScannerPageState extends State<ScannerPage> {
     await _controller!
         .setFlashMode(_enableTorch ? FlashMode.torch : FlashMode.off);
   }
+}
+
+class _ComputationInput {
+  final CameraImage image;
+
+  const _ComputationInput({
+    required this.image,
+  });
 }

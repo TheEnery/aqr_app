@@ -1,12 +1,14 @@
-import 'package:image/image.dart' as imglib;
 import 'package:camera/camera.dart';
+import 'package:image/image.dart' as imglib;
 
 class ImageConverter {
   ///
   /// Converts a [CameraImage] to [imglib.Image] in RGB format with rotation correction.
   ///
-  static imglib.Image convertCameraImage(CameraImage cameraImage,
-      {required int rotationDegrees}) {
+  static imglib.Image convertCameraImage(
+    CameraImage cameraImage, {
+    int? rotationDegrees,
+  }) {
     if (cameraImage.format.group == ImageFormatGroup.yuv420) {
       return convertYUV420ToImage(cameraImage,
           rotationDegrees: rotationDegrees);
@@ -21,8 +23,10 @@ class ImageConverter {
   ///
   /// Converts a [CameraImage] in BGRA8888 format to [imglib.Image] in RGB format with rotation correction.
   ///
-  static imglib.Image convertBGRA8888ToImage(CameraImage cameraImage,
-      {required int rotationDegrees}) {
+  static imglib.Image convertBGRA8888ToImage(
+    CameraImage cameraImage, {
+    int? rotationDegrees,
+  }) {
     final width = cameraImage.planes[0].width!;
     final height = cameraImage.planes[0].height!;
 
@@ -35,6 +39,7 @@ class ImageConverter {
 
     (int x, int y) Function(int x, int y) getRotatedPosition =
         switch (rotationDegrees) {
+      0 => (int x, int y) => (x, y),
       90 => (int x, int y) => (height - 1 - y, x),
       180 => (int x, int y) => (width - 1 - x, height - 1 - y),
       270 => (int x, int y) => (y, width - 1 - x),
@@ -59,8 +64,10 @@ class ImageConverter {
   ///
   /// Converts a [CameraImage] in YUV420 format to [imglib.Image] in RGB format with rotation correction.
   ///
-  static imglib.Image convertYUV420ToImage(CameraImage cameraImage,
-      {required int rotationDegrees}) {
+  static imglib.Image convertYUV420ToImage(
+    CameraImage cameraImage, {
+    int? rotationDegrees,
+  }) {
     final width = cameraImage.width;
     final height = cameraImage.height;
 
@@ -73,6 +80,7 @@ class ImageConverter {
 
     (int x, int y) Function(int x, int y) getRotatedPosition =
         switch (rotationDegrees) {
+      0 => (int x, int y) => (x, y),
       90 => (int x, int y) => (height - 1 - y, x),
       180 => (int x, int y) => (width - 1 - x, height - 1 - y),
       270 => (int x, int y) => (y, width - 1 - x),
