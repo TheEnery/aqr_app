@@ -1,6 +1,7 @@
-import 'package:aqr/widgets/generator_page.dart';
-import 'package:aqr/widgets/scanner_page.dart';
 import 'package:flutter/material.dart';
+
+import 'package:aqr/widgets/pages/generator_page.dart';
+import 'package:aqr/widgets/pages/scanner_page.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -16,12 +17,14 @@ class AqrApp extends StatelessWidget {
     return MaterialApp(
       home: const HomeScreen(),
       darkTheme: ThemeData(
+        appBarTheme: const AppBarTheme(centerTitle: true),
         colorScheme: ColorScheme.fromSeed(
           seedColor: Colors.green,
           brightness: Brightness.dark,
         ),
       ),
       theme: ThemeData(
+        appBarTheme: const AppBarTheme(centerTitle: true),
         colorScheme: ColorScheme.fromSeed(
           seedColor: Colors.green,
         ),

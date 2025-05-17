@@ -1,11 +1,13 @@
 import 'dart:async';
 
-import 'package:camera/camera.dart';
-import 'package:aqr/core/camera_controller_extension.dart';
-import 'package:aqr/widgets/loading_widget.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+
+import 'package:camera/camera.dart';
 import 'package:image/image.dart' as imglib;
+
+import 'package:aqr/core/camera_controller_extension.dart';
+import 'package:aqr/widgets/dummy/loading_widget.dart';
 
 class ScannerPage extends StatefulWidget {
   const ScannerPage({super.key});
@@ -119,12 +121,12 @@ class _ScannerPageState extends State<ScannerPage> {
     _scanSubscription = _scanning().listen(
       (event) {
         if (!context.mounted) return;
-        showDialog(
-          context: context,
-          builder: (context) {
-            return Image.memory(imglib.encodeBmp(event));
-          },
-        );
+        // showDialog(
+        //   context: context,
+        //   builder: (context) {
+        //     return Image.memory(imglib.encodeBmp(event));
+        //   },
+        // );
       },
     );
   }
