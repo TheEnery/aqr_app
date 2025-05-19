@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 
-import 'package:aqr/qr/qr_templates/email_template.dart';
+import 'package:aqr_lib/templates.dart';
 
 class EmailTemplateWidget extends StatelessWidget {
   final EmailTemplate email;

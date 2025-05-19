@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 
-import 'package:aqr/widgets/pages/generator_page.dart';
-import 'package:aqr/widgets/pages/scanner_page.dart';
+import './pages/generator_page.dart';
+import './pages/scanner_page.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();

@@ -1,19 +1,19 @@
 import 'package:flutter/material.dart';
 
+import 'package:aqr_lib/core.dart';
+import 'package:aqr_lib/encoder.dart';
 import 'package:image/image.dart' as imglib;
-import 'package:zxing_lib/qrcode.dart';
 
-import 'package:aqr/qr/template.dart';
-import 'package:aqr/widgets/qr_template_form_wrapper.dart';
-import 'package:aqr/widgets/qr_template_forms.dart/calendar_event_form.dart';
-import 'package:aqr/widgets/qr_template_forms.dart/contact_info_template_form.dart';
-import 'package:aqr/widgets/qr_template_forms.dart/email_template_form.dart';
-import 'package:aqr/widgets/qr_template_forms.dart/geolocation_template_form.dart';
-import 'package:aqr/widgets/qr_template_forms.dart/phone_number_template_form.dart';
-import 'package:aqr/widgets/qr_template_forms.dart/sms_template_form.dart';
-import 'package:aqr/widgets/qr_template_forms.dart/url_template_form.dart';
-import 'package:aqr/widgets/qr_template_forms.dart/wifi_template_form.dart';
-import 'package:aqr/widgets/text_to_qr_form.dart';
+import '../template_forms/calendar_event_form.dart';
+import '../template_forms/contact_info_template_form.dart';
+import '../template_forms/email_template_form.dart';
+import '../template_forms/geolocation_template_form.dart';
+import '../template_forms/phone_number_template_form.dart';
+import '../template_forms/sms_template_form.dart';
+import '../template_forms/url_template_form.dart';
+import '../template_forms/wifi_template_form.dart';
+import '../widgets/template_form_wrapper.dart';
+import '../widgets/text_to_qr_form.dart';
 
 class GeneratorPage extends StatefulWidget {
   const GeneratorPage({super.key});
@@ -23,12 +23,20 @@ class GeneratorPage extends StatefulWidget {
 }
 
 class _GeneratorPageState extends State<GeneratorPage> {
-  static const eclOptions = [
-    (ecl: ErrorCorrectionLevel.L, label: 'L', recovery: 7),
-    (ecl: ErrorCorrectionLevel.M, label: 'M', recovery: 15),
-    (ecl: ErrorCorrectionLevel.Q, label: 'Q', recovery: 25),
-    (ecl: ErrorCorrectionLevel.H, label: 'H', recovery: 30),
+  static const clOptions = [
+    (cl: 0, label: '0 (regular QR)'),
+    (cl: 1, label: '1'),
+    (cl: 2, label: '2'),
+    (cl: 3, label: '3 (less stable)'),
   ];
+  static const eclOptions = [
+    (ecl: ErrorCorrection.L, label: 'L', recovery: 7),
+    (ecl: ErrorCorrection.M, label: 'M', recovery: 15),
+    (ecl: ErrorCorrection.Q, label: 'Q', recovery: 25),
+    (ecl: ErrorCorrection.H, label: 'H', recovery: 30),
+  ];
+
+  var clOption = clOptions[0];
   var eclOption = eclOptions[1];
 
   @override
@@ -43,6 +51,17 @@ class _GeneratorPageState extends State<GeneratorPage> {
           subtitle: const Text('Parameters of generated codes'),
           childrenPadding: const EdgeInsets.only(left: 16.0),
           children: [
+            DropdownButtonFormField(
+              decoration: const InputDecoration(
+                labelText: 'Compression level',
+              ),
+              padding: const EdgeInsets.all(16.0),
+              value: clOption,
+              items: clOptions
+                  .map((o) => DropdownMenuItem(value: o, child: Text(o.label)))
+                  .toList(),
+              onChanged: (o) => setState(() => clOption = o ?? clOptions[0]),
+            ),
             DropdownButtonFormField(
               decoration: const InputDecoration(
                 labelText: 'Error correction level',
@@ -68,8 +87,8 @@ class _GeneratorPageState extends State<GeneratorPage> {
             Navigator.push(
               context,
               MaterialPageRoute(
-                builder: (context) => QrTemplateFormWrapper(
-                  builder: (context) => TextToQrForm(onSubmit: makeQr),
+                builder: (context) => TemplateFormWrapper(
+                  builder: (context) => TextToAqrForm(onSubmit: makeAqr),
                   name: 'Text',
                 ),
               ),
@@ -96,7 +115,7 @@ class _GeneratorPageState extends State<GeneratorPage> {
                 Navigator.push(
                   context,
                   MaterialPageRoute(
-                    builder: (context) => QrTemplateFormWrapper(
+                    builder: (context) => TemplateFormWrapper(
                       builder: (context) => CalendarEventForm(
                         onSubmit: onSubmit,
                       ),
@@ -113,7 +132,7 @@ class _GeneratorPageState extends State<GeneratorPage> {
                 Navigator.push(
                   context,
                   MaterialPageRoute(
-                    builder: (context) => QrTemplateFormWrapper(
+                    builder: (context) => TemplateFormWrapper(
                       builder: (context) =>
                           ContactInfoTemplateForm(onSubmit: onSubmit),
                       name: 'Contact info',
@@ -129,7 +148,7 @@ class _GeneratorPageState extends State<GeneratorPage> {
                 Navigator.push(
                   context,
                   MaterialPageRoute(
-                    builder: (context) => QrTemplateFormWrapper(
+                    builder: (context) => TemplateFormWrapper(
                       builder: (context) => EmailTemplateForm(
                         onSubmit: onSubmit,
                       ),
@@ -146,7 +165,7 @@ class _GeneratorPageState extends State<GeneratorPage> {
                 Navigator.push(
                   context,
                   MaterialPageRoute(
-                    builder: (context) => QrTemplateFormWrapper(
+                    builder: (context) => TemplateFormWrapper(
                       builder: (context) =>
                           GeolocationTemplateForm(onSubmit: onSubmit),
                       name: 'Geolocation',
@@ -162,7 +181,7 @@ class _GeneratorPageState extends State<GeneratorPage> {
                 Navigator.push(
                   context,
                   MaterialPageRoute(
-                    builder: (context) => QrTemplateFormWrapper(
+                    builder: (context) => TemplateFormWrapper(
                       builder: (context) =>
                           PhoneNumberTemplateForm(onSubmit: onSubmit),
                       name: 'Phone number',
@@ -178,7 +197,7 @@ class _GeneratorPageState extends State<GeneratorPage> {
                 Navigator.push(
                   context,
                   MaterialPageRoute(
-                    builder: (context) => QrTemplateFormWrapper(
+                    builder: (context) => TemplateFormWrapper(
                       builder: (context) => SmsTemplateForm(onSubmit: onSubmit),
                       name: 'SMS',
                     ),
@@ -193,7 +212,7 @@ class _GeneratorPageState extends State<GeneratorPage> {
                 Navigator.push(
                   context,
                   MaterialPageRoute(
-                    builder: (context) => QrTemplateFormWrapper(
+                    builder: (context) => TemplateFormWrapper(
                       builder: (context) => UrlTemplateForm(onSubmit: onSubmit),
                       name: 'URL',
                     ),
@@ -208,7 +227,7 @@ class _GeneratorPageState extends State<GeneratorPage> {
                 Navigator.push(
                   context,
                   MaterialPageRoute(
-                    builder: (context) => QrTemplateFormWrapper(
+                    builder: (context) => TemplateFormWrapper(
                       builder: (context) =>
                           WifiTemplateForm(onSubmit: onSubmit),
                       name: 'Wi-Fi',
@@ -224,24 +243,18 @@ class _GeneratorPageState extends State<GeneratorPage> {
   }
 
   void onSubmit(BuildContext context, Template template) {
-    makeQr(context, template.displayResult);
+    makeAqr(context, template.displayResult);
   }
 
-  void makeQr(BuildContext context, String text) {
-    final qrCode = Encoder.encode(text, eclOption.ecl);
-    final matrix = qrCode.matrix!;
-    final image = imglib.Image(
-      width: matrix.width,
-      height: matrix.height,
-    );
-    final black = imglib.ColorRgb8(0, 0, 0);
-    final white = imglib.ColorRgb8(255, 255, 255);
+  void makeAqr(BuildContext context, String text) {
+    final symbol = Encoder().encode(
+        data: text,
+        meta: AqrMeta(
+          compression: Compression(level: clOption.cl),
+          errorCorrection: eclOption.ecl,
+        ));
 
-    for (int x = 0; x < matrix.width; x++) {
-      for (int y = 0; y < matrix.height; y++) {
-        image.setPixel(x, y, matrix.get(x, y) == 1 ? black : white);
-      }
-    }
+    final image = symbol.draw();
 
     showModalBottomSheet(
       context: context,

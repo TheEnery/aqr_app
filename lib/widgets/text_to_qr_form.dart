@@ -1,15 +1,15 @@
 import 'package:flutter/material.dart';
 
-class TextToQrForm extends StatefulWidget {
-  const TextToQrForm({super.key, required this.onSubmit});
+class TextToAqrForm extends StatefulWidget {
+  const TextToAqrForm({super.key, required this.onSubmit});
 
   final Function(BuildContext, String) onSubmit;
 
   @override
-  State<TextToQrForm> createState() => _TextToQrFormState();
+  State<TextToAqrForm> createState() => _TextToAqrFormState();
 }
 
-class _TextToQrFormState extends State<TextToQrForm> {
+class _TextToAqrFormState extends State<TextToAqrForm> {
   final textController = TextEditingController();
 
   @override

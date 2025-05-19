@@ -1,11 +1,12 @@
 import 'package:flutter/material.dart';
 
-import 'package:aqr/qr/qr_template_parsers/url_template_parser.dart';
-import 'package:aqr/qr/qr_templates/url_template.dart';
-import 'package:aqr/widgets/dummy/vertical_gap.dart';
-import 'package:aqr/widgets/qr_template_form.dart';
+import 'package:aqr_lib/template_parsers.dart';
+import 'package:aqr_lib/templates.dart';
 
-class UrlTemplateForm extends QrTemplateForm<UrlTemplate> {
+import '../dummy/vertical_gap.dart';
+import '../widgets/template_form.dart';
+
+class UrlTemplateForm extends TemplateForm<UrlTemplate> {
   const UrlTemplateForm({super.key, required super.onSubmit})
       : super(parser: const UrlTemplateParser());
 

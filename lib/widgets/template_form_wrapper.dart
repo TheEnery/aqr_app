@@ -1,10 +1,10 @@
 import 'package:flutter/material.dart';
 
-class QrTemplateFormWrapper extends StatelessWidget {
+class TemplateFormWrapper extends StatelessWidget {
   final String name;
   final Widget Function(BuildContext context) builder;
 
-  const QrTemplateFormWrapper({
+  const TemplateFormWrapper({
     super.key,
     required this.builder,
     required this.name,

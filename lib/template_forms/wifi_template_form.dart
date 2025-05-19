@@ -1,11 +1,12 @@
 import 'package:flutter/material.dart';
 
-import 'package:aqr/qr/qr_template_parsers/wifi_template_parser.dart';
-import 'package:aqr/qr/qr_templates/wifi_template.dart';
-import 'package:aqr/widgets/dummy/vertical_gap.dart';
-import 'package:aqr/widgets/qr_template_form.dart';
+import 'package:aqr_lib/template_parsers.dart';
+import 'package:aqr_lib/templates.dart';
 
-class WifiTemplateForm extends QrTemplateForm<WifiTemplate> {
+import '../dummy/vertical_gap.dart';
+import '../widgets/template_form.dart';
+
+class WifiTemplateForm extends TemplateForm<WifiTemplate> {
   const WifiTemplateForm({super.key, required super.onSubmit})
       : super(parser: const WifiTemplateParser());
 

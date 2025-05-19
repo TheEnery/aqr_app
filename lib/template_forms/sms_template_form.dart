@@ -1,10 +1,11 @@
 import 'package:flutter/material.dart';
 
-import 'package:aqr/qr/qr_template_parsers/sms_template_parser.dart';
-import 'package:aqr/qr/qr_templates/sms_template.dart';
-import 'package:aqr/widgets/qr_template_form.dart';
+import 'package:aqr_lib/template_parsers.dart';
+import 'package:aqr_lib/templates.dart';
 
-class SmsTemplateForm extends QrTemplateForm<SmsTemplate> {
+import '../widgets/template_form.dart';
+
+class SmsTemplateForm extends TemplateForm<SmsTemplate> {
   const SmsTemplateForm({super.key, required super.onSubmit})
       : super(parser: const SmsTemplateParser());
 

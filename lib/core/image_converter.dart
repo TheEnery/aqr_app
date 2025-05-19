@@ -1,5 +1,5 @@
-import 'package:image/image.dart' as imglib;
 import 'package:camera/camera.dart';
+import 'package:image/image.dart' as imglib;
 
 class ImageConverter {
   ///
