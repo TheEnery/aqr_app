@@ -11,8 +11,10 @@ dependencies:
     sdk: flutter
   camera: ^0.11.0+2
   image: ^4.0.17
+  wakelock_plus: ^1.2.10
   aqr_lib:
     path: ../aqr_lib
+  file_picker: ^10.1.9
 
 dev_dependencies:
   flutter_test:
