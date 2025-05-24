@@ -15,6 +15,7 @@ dependencies:
   aqr_lib:
     path: ../aqr_lib
   file_picker: ^10.1.9
+  reorderables: ^0.6.0
 
 dev_dependencies:
   flutter_test:

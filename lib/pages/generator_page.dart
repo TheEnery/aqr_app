@@ -2,7 +2,10 @@ import 'package:flutter/material.dart';
 
 import 'package:aqr_lib/core.dart';
 import 'package:aqr_lib/encoder.dart';
+import 'package:file_picker/file_picker.dart';
 import 'package:image/image.dart' as imglib;
+
+import 'package:aqr_app/pages/constructor_page.dart';
 
 import '../template_forms/calendar_event_form.dart';
 import '../template_forms/contact_info_template_form.dart';
@@ -88,7 +91,7 @@ class _GeneratorPageState extends State<GeneratorPage> {
               context,
               MaterialPageRoute(
                 builder: (context) => TemplateFormWrapper(
-                  builder: (context) => TextToAqrForm(onSubmit: makeAqr),
+                  builder: (context) => TextToAqrForm(onSubmit: make),
                   name: 'Text',
                 ),
               ),
@@ -99,7 +102,15 @@ class _GeneratorPageState extends State<GeneratorPage> {
           leading: const Icon(Icons.extension),
           title: const Text('Constructor'),
           subtitle: const Text('Make QR from data segments'),
-          onTap: () {},
+          onTap: () {
+            Navigator.push(
+              context,
+              MaterialPageRoute(
+                builder: (context) =>
+                    ConstructorPage(onSubmit: makeFromSegments),
+              ),
+            );
+          },
         ),
         ExpansionTile(
           shape: const Border(),
@@ -117,7 +128,7 @@ class _GeneratorPageState extends State<GeneratorPage> {
                   MaterialPageRoute(
                     builder: (context) => TemplateFormWrapper(
                       builder: (context) => CalendarEventForm(
-                        onSubmit: onSubmit,
+                        onSubmit: onTemplateFormSubmit,
                       ),
                       name: 'Calendar event',
                     ),
@@ -133,8 +144,8 @@ class _GeneratorPageState extends State<GeneratorPage> {
                   context,
                   MaterialPageRoute(
                     builder: (context) => TemplateFormWrapper(
-                      builder: (context) =>
-                          ContactInfoTemplateForm(onSubmit: onSubmit),
+                      builder: (context) => ContactInfoTemplateForm(
+                          onSubmit: onTemplateFormSubmit),
                       name: 'Contact info',
                     ),
                   ),
@@ -150,7 +161,7 @@ class _GeneratorPageState extends State<GeneratorPage> {
                   MaterialPageRoute(
                     builder: (context) => TemplateFormWrapper(
                       builder: (context) => EmailTemplateForm(
-                        onSubmit: onSubmit,
+                        onSubmit: onTemplateFormSubmit,
                       ),
                       name: 'Email',
                     ),
@@ -166,8 +177,8 @@ class _GeneratorPageState extends State<GeneratorPage> {
                   context,
                   MaterialPageRoute(
                     builder: (context) => TemplateFormWrapper(
-                      builder: (context) =>
-                          GeolocationTemplateForm(onSubmit: onSubmit),
+                      builder: (context) => GeolocationTemplateForm(
+                          onSubmit: onTemplateFormSubmit),
                       name: 'Geolocation',
                     ),
                   ),
@@ -182,8 +193,8 @@ class _GeneratorPageState extends State<GeneratorPage> {
                   context,
                   MaterialPageRoute(
                     builder: (context) => TemplateFormWrapper(
-                      builder: (context) =>
-                          PhoneNumberTemplateForm(onSubmit: onSubmit),
+                      builder: (context) => PhoneNumberTemplateForm(
+                          onSubmit: onTemplateFormSubmit),
                       name: 'Phone number',
                     ),
                   ),
@@ -198,7 +209,8 @@ class _GeneratorPageState extends State<GeneratorPage> {
                   context,
                   MaterialPageRoute(
                     builder: (context) => TemplateFormWrapper(
-                      builder: (context) => SmsTemplateForm(onSubmit: onSubmit),
+                      builder: (context) =>
+                          SmsTemplateForm(onSubmit: onTemplateFormSubmit),
                       name: 'SMS',
                     ),
                   ),
@@ -213,7 +225,8 @@ class _GeneratorPageState extends State<GeneratorPage> {
                   context,
                   MaterialPageRoute(
                     builder: (context) => TemplateFormWrapper(
-                      builder: (context) => UrlTemplateForm(onSubmit: onSubmit),
+                      builder: (context) =>
+                          UrlTemplateForm(onSubmit: onTemplateFormSubmit),
                       name: 'URL',
                     ),
                   ),
@@ -229,7 +242,7 @@ class _GeneratorPageState extends State<GeneratorPage> {
                   MaterialPageRoute(
                     builder: (context) => TemplateFormWrapper(
                       builder: (context) =>
-                          WifiTemplateForm(onSubmit: onSubmit),
+                          WifiTemplateForm(onSubmit: onTemplateFormSubmit),
                       name: 'Wi-Fi',
                     ),
                   ),
@@ -242,30 +255,64 @@ class _GeneratorPageState extends State<GeneratorPage> {
     );
   }
 
-  void onSubmit(BuildContext context, Template template) {
-    makeAqr(context, template.displayResult);
+  void onTemplateFormSubmit(BuildContext context, Template template) {
+    make(context, template.displayResult);
   }
 
-  void makeAqr(BuildContext context, String text) {
-    final symbol = Encoder().encode(
-        data: text,
-        meta: AqrMeta(
-          compression: Compression(level: clOption.cl),
-          errorCorrection: eclOption.ecl,
-        ));
+  void makeFromSegments(BuildContext context, List<Segment> segments) {
+    final symbol = Encoder().encodeSegments(
+      data: segments,
+      meta: AqrMeta(
+        compression: Compression(level: clOption.cl),
+        errorCorrection: eclOption.ecl,
+      ),
+    );
 
+    showResult(context, symbol);
+  }
+
+  void make(BuildContext context, String text) {
+    final symbol = Encoder().encode(
+      data: text,
+      meta: AqrMeta(
+        compression: Compression(level: clOption.cl),
+        errorCorrection: eclOption.ecl,
+      ),
+    );
+
+    showResult(context, symbol);
+  }
+
+  void showResult(BuildContext context, AqrCode symbol) {
     final image = symbol.draw();
+    final bytes =
+        imglib.encodePng(imglib.copyResize(image, width: 500, height: 500));
 
     showModalBottomSheet(
       context: context,
       shape: const Border(),
-      builder: (context) => Padding(
-        padding: const EdgeInsets.all(16.0),
-        child: Image.memory(
-          imglib.encodePng(imglib.copyResize(image, width: 500, height: 500)),
-          fit: BoxFit.contain,
-          width: 500,
-          height: 500,
+      builder: (context) => SingleChildScrollView(
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.start,
+          children: [
+            Padding(
+              padding: const EdgeInsets.all(8.0),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.end,
+                children: [
+                  IconButton(
+                      onPressed: () async {
+                        await FilePicker.platform.saveFile(
+                            fileName: 'aqr.png',
+                            allowedExtensions: ['png'],
+                            bytes: bytes);
+                      },
+                      icon: const Icon(Icons.save_alt))
+                ],
+              ),
+            ),
+            Image.memory(bytes),
+          ],
         ),
       ),
     );

@@ -15,6 +15,7 @@ class AqrApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
+      debugShowCheckedModeBanner: false,
       home: const HomeScreen(),
       darkTheme: ThemeData(
         appBarTheme: const AppBarTheme(centerTitle: true),

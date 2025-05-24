@@ -247,7 +247,7 @@ class _ScannerPageState extends State<ScannerPage> {
                   children: [
                     Text(result.text),
                     const VerticalGap(16.0),
-                    Text('Error count: ${debugInfo.errorCount}')
+                    Text('Error count: ${debugInfo.errorCount}'),
                   ],
                 ),
               ),
