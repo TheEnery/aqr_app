@@ -126,17 +126,20 @@ class _ScannerPageState extends State<ScannerPage> {
           final image = await _controller!.inMemoryImage();
           final result = await compute((image) {
             final lrgb = LrgbMatrix.fromImage(image);
-            final compare = Encoder().encode(
-                data:
-                    'A LOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOT OF SOOOOOOOOOOOOOOOOOOOOME TEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEXT AND MOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOREEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEE',
-                meta: AqrMeta(
-                  compression: Compression(level: 2),
-                  mask: Mask(number: 0),
-                ));
-            final debugInfo = DecoderDebugInfo()..compareWith = compare;
+            // final compare = Encoder().encode(
+            //     data:
+            //         'A LOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOT OF SOOOOOOOOOOOOOOOOOOOOME TEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEXT AND MOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOREEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEE',
+            //     meta: AqrMeta(
+            //       compression: Compression(level: 2),
+            //       mask: Mask(number: 0),
+            //     ));
+            final debugInfo = DecoderDebugInfo(); //..compareWith = compare;
 
             try {
-              return (Decoder().decode(lrgb, debugInfo: debugInfo), debugInfo);
+              return (
+                Decoder().decode(lrgb),
+                debugInfo
+              ); //, debugInfo: debugInfo), debugInfo);
             } on Exception catch (e, s) {
               debugPrintStack(stackTrace: s, label: e.toString());
               print('ERRORS: ${debugInfo.errorCount}');
@@ -182,17 +185,20 @@ class _ScannerPageState extends State<ScannerPage> {
 
     final result = await compute((image) {
       final lrgb = LrgbMatrix.fromImage(image);
-      final compare = Encoder().encode(
-          data:
-              'A LOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOT OF SOOOOOOOOOOOOOOOOOOOOME TEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEXT AND MOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOREEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEE',
-          meta: AqrMeta(
-            compression: Compression(level: 2),
-            mask: Mask(number: 0),
-          ));
-      final debugInfo = DecoderDebugInfo()..compareWith = compare;
+      // final compare = Encoder().encode(
+      //     data:
+      //         'A LOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOT OF SOOOOOOOOOOOOOOOOOOOOME TEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEXT AND MOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOREEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEE',
+      //     meta: AqrMeta(
+      //       compression: Compression(level: 2),
+      //       mask: Mask(number: 0),
+      //     ));
+      final debugInfo = DecoderDebugInfo(); //..compareWith = compare;
 
       try {
-        return (Decoder().decode(lrgb, debugInfo: debugInfo), debugInfo);
+        return (
+          Decoder().decode(lrgb),
+          debugInfo
+        ); //, debugInfo: debugInfo), debugInfo);
       } on Exception catch (e, s) {
         debugPrintStack(stackTrace: s, label: e.toString());
         print('ERRORS: ${debugInfo.errorCount}');
@@ -244,10 +250,23 @@ class _ScannerPageState extends State<ScannerPage> {
               body: Padding(
                 padding: const EdgeInsets.all(16.0),
                 child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.center,
                   children: [
-                    Text(result.text),
-                    const VerticalGap(16.0),
-                    Text('Error count: ${debugInfo.errorCount}'),
+                    Container(
+                      padding: const EdgeInsets.all(8.0),
+                      width: double.infinity,
+                      decoration: BoxDecoration(
+                        border: Border.all(color: Colors.white),
+                        borderRadius: BorderRadius.circular(8.0),
+                      ),
+                      child: SelectableText(
+                        result.text,
+                        maxLines: null,
+                      ),
+                    ),
+                    // Text(result.text),
+                    // const VerticalGap(16.0),
+                    // Text('Error count: ${debugInfo.errorCount}'),
                   ],
                 ),
               ),
@@ -259,74 +278,76 @@ class _ScannerPageState extends State<ScannerPage> {
       return;
     }
 
-    showModalBottomSheet(
-        context: context,
-        builder: (context) {
-          return FractionallySizedBox(
-            widthFactor: 1.0,
-            heightFactor: 1.0,
-            child: SingleChildScrollView(
-              padding: const EdgeInsets.all(16.0),
-              child: Column(
-                children: [
-                  if (debugInfo.wbImage != null) ...[
-                    const Text('Black and white image:'),
-                    Image.memory(imglib.encodePng(debugInfo.wbImage!)),
-                  ],
-                  if (debugInfo.wbDetectedImage != null) ...[
-                    const Text('Black and white detected image:'),
-                    Image.memory(
-                      imglib.encodePng(imglib.copyResize(
-                        debugInfo.wbDetectedImage!,
-                        height: 500,
-                        width: 500,
-                      )),
-                      fit: BoxFit.fitWidth,
-                    ),
-                  ],
-                  if (debugInfo.detectedImage != null) ...[
-                    const Text('Detected image:'),
-                    Image.memory(imglib.encodePng(imglib.copyResize(
-                      debugInfo.detectedImage!,
-                      height: 500,
-                      width: 500,
-                    ))),
-                  ],
-                  if (debugInfo.colorCorrectedImage != null) ...[
-                    const Text('Color corrected image:'),
-                    Image.memory(imglib.encodePng(imglib.copyResize(
-                      debugInfo.colorCorrectedImage!,
-                      height: 500,
-                      width: 500,
-                    ))),
-                  ],
-                  if (debugInfo.colorDistributionImage != null) ...[
-                    const Text('Color distribution:'),
-                    Image.memory(
-                        imglib.encodePng(debugInfo.colorDistributionImage!)),
-                  ],
-                  if (debugInfo.correctedImage != null) ...[
-                    const Text('Corrected image:'),
-                    Image.memory(imglib.encodePng(imglib.copyResize(
-                      debugInfo.correctedImage!,
-                      height: 500,
-                      width: 500,
-                    ))),
-                  ],
-                  if (debugInfo.errorImage != null) ...[
-                    const Text('Error image:'),
-                    Image.memory(imglib.encodePng(imglib.copyResize(
-                      debugInfo.errorImage!,
-                      height: 500,
-                      width: 500,
-                    ))),
-                  ],
-                  Text('Error count: ${debugInfo.errorCount}'),
-                ],
-              ),
-            ),
-          );
-        }).then((_) => _subscribeToScan());
-    _unsubscribeToScan();
+    return;
+
+    // showModalBottomSheet(
+    //     context: context,
+    //     builder: (context) {
+    //       return FractionallySizedBox(
+    //         widthFactor: 1.0,
+    //         heightFactor: 1.0,
+    //         child: SingleChildScrollView(
+    //           padding: const EdgeInsets.all(16.0),
+    //           child: Column(
+    //             children: [
+    //               if (debugInfo.wbImage != null) ...[
+    //                 const Text('Black and white image:'),
+    //                 Image.memory(imglib.encodePng(debugInfo.wbImage!)),
+    //               ],
+    //               if (debugInfo.wbDetectedImage != null) ...[
+    //                 const Text('Black and white detected image:'),
+    //                 Image.memory(
+    //                   imglib.encodePng(imglib.copyResize(
+    //                     debugInfo.wbDetectedImage!,
+    //                     height: 500,
+    //                     width: 500,
+    //                   )),
+    //                   fit: BoxFit.fitWidth,
+    //                 ),
+    //               ],
+    //               if (debugInfo.detectedImage != null) ...[
+    //                 const Text('Detected image:'),
+    //                 Image.memory(imglib.encodePng(imglib.copyResize(
+    //                   debugInfo.detectedImage!,
+    //                   height: 500,
+    //                   width: 500,
+    //                 ))),
+    //               ],
+    //               if (debugInfo.colorCorrectedImage != null) ...[
+    //                 const Text('Color corrected image:'),
+    //                 Image.memory(imglib.encodePng(imglib.copyResize(
+    //                   debugInfo.colorCorrectedImage!,
+    //                   height: 500,
+    //                   width: 500,
+    //                 ))),
+    //               ],
+    //               if (debugInfo.colorDistributionImage != null) ...[
+    //                 const Text('Color distribution:'),
+    //                 Image.memory(
+    //                     imglib.encodePng(debugInfo.colorDistributionImage!)),
+    //               ],
+    //               if (debugInfo.correctedImage != null) ...[
+    //                 const Text('Corrected image:'),
+    //                 Image.memory(imglib.encodePng(imglib.copyResize(
+    //                   debugInfo.correctedImage!,
+    //                   height: 500,
+    //                   width: 500,
+    //                 ))),
+    //               ],
+    //               if (debugInfo.errorImage != null) ...[
+    //                 const Text('Error image:'),
+    //                 Image.memory(imglib.encodePng(imglib.copyResize(
+    //                   debugInfo.errorImage!,
+    //                   height: 500,
+    //                   width: 500,
+    //                 ))),
+    //               ],
+    //               Text('Error count: ${debugInfo.errorCount}'),
+    //             ],
+    //           ),
+    //         ),
+    //       );
+    //     }).then((_) => _subscribeToScan());
+    // _unsubscribeToScan();
   }
 }

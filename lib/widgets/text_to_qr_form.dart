@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 
+import 'package:aqr_app/dummy/vertical_gap.dart';
+
 class TextToAqrForm extends StatefulWidget {
   const TextToAqrForm({super.key, required this.onSubmit});
 
@@ -34,6 +36,7 @@ class _TextToAqrFormState extends State<TextToAqrForm> {
                 return null;
               },
             ),
+            const VerticalGap(16.0),
             ElevatedButton(
               onPressed: () => widget.onSubmit(context, textController.text),
               child: const Text('Submit'),
