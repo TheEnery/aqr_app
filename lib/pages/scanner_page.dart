@@ -68,10 +68,8 @@ class _ScannerPageState extends State<ScannerPage> {
 
     final canToggleCamera = _cameras!.length > 1;
 
-    return Stack(
-      alignment: Alignment.topCenter,
+    return Column(
       children: [
-        Center(child: CameraPreview(_controller!)),
         Padding(
           padding: const EdgeInsets.all(16.0),
           child: Row(
@@ -93,6 +91,21 @@ class _ScannerPageState extends State<ScannerPage> {
                 ),
               ),
             ],
+          ),
+        ),
+        Expanded(
+          child: FractionallySizedBox(
+            widthFactor: 1.0,
+            heightFactor: 1.0,
+            child: FittedBox(
+              clipBehavior: Clip.hardEdge,
+              fit: BoxFit.cover,
+              child: SizedBox(
+                width: _controller!.value.previewSize!.height,
+                height: _controller!.value.previewSize!.width,
+                child: CameraPreview(_controller!),
+              ),
+            ),
           ),
         )
       ],
