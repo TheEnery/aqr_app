@@ -5,16 +5,14 @@ import 'package:flutter/material.dart';
 
 import 'package:aqr_lib/core.dart';
 import 'package:aqr_lib/decoder.dart';
-import 'package:aqr_lib/encoder.dart';
 import 'package:camera/camera.dart';
 import 'package:file_picker/file_picker.dart';
 import 'package:image/image.dart' as imglib;
 import 'package:wakelock_plus/wakelock_plus.dart';
 
-import 'package:aqr_app/dummy/vertical_gap.dart';
-
 import '../core/camera_controller_extension.dart';
 import '../dummy/loading_widget.dart';
+import '../dummy/vertical_gap.dart';
 
 class ScannerPage extends StatefulWidget {
   const ScannerPage({super.key});
@@ -28,8 +26,10 @@ class _ScannerPageState extends State<ScannerPage> {
   CameraController? _controller;
   int _currentCameraIndex = 0;
   bool _enableTorch = false;
+  bool _isDebugEnabled = false;
   bool _isPickingFile = false;
   final _scanDelayMs = 200;
+  bool _shouldDebugFails = false;
   StreamSubscription? _scanSubscription;
 
   @override
@@ -73,22 +73,69 @@ class _ScannerPageState extends State<ScannerPage> {
         Padding(
           padding: const EdgeInsets.all(16.0),
           child: Row(
-            mainAxisAlignment: MainAxisAlignment.end,
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              IconButton(
-                onPressed: _scanImage,
-                icon: const Icon(Icons.image),
+              MenuAnchor(
+                menuChildren: [
+                  MenuItemButton(
+                    leadingIcon: const Icon(Icons.bug_report),
+                    child: Text(
+                        _isDebugEnabled ? 'Disable debug' : 'Enable debug'),
+                    onPressed: () {
+                      setState(() => _isDebugEnabled = !_isDebugEnabled);
+                    },
+                  ),
+                  if (_isDebugEnabled)
+                    MenuItemButton(
+                      leadingIcon: const Icon(Icons.analytics),
+                      child: Text(_shouldDebugFails
+                          ? 'Debug success only'
+                          : 'Debug fails'),
+                      onPressed: () {
+                        setState(() => _shouldDebugFails = !_shouldDebugFails);
+                      },
+                    ),
+                  MenuItemButton(
+                    leadingIcon: const Icon(Icons.info),
+                    child: const Text('About'),
+                    onPressed: () {
+                      showAboutDialog(
+                        context: context,
+                        applicationName: 'AQR',
+                        applicationVersion: 'v0.1.0',
+                      );
+                    },
+                  )
+                ],
+                builder: (context, controller, child) => IconButton(
+                    onPressed: () {
+                      if (controller.isOpen) {
+                        controller.close();
+                      } else {
+                        controller.open();
+                      }
+                    },
+                    icon: const Icon(Icons.menu)),
               ),
-              if (canToggleCamera)
-                IconButton(
-                  onPressed: _toggleCamera,
-                  icon: const Icon(Icons.flip_camera_android),
-                ),
-              IconButton(
-                onPressed: _toggleFlashMode,
-                icon: Icon(
-                  _enableTorch ? Icons.flashlight_on : Icons.flashlight_off,
-                ),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.end,
+                children: [
+                  IconButton(
+                    onPressed: _scanImage,
+                    icon: const Icon(Icons.image),
+                  ),
+                  if (canToggleCamera)
+                    IconButton(
+                      onPressed: _toggleCamera,
+                      icon: const Icon(Icons.flip_camera_android),
+                    ),
+                  IconButton(
+                    onPressed: _toggleFlashMode,
+                    icon: Icon(
+                      _enableTorch ? Icons.flashlight_on : Icons.flashlight_off,
+                    ),
+                  ),
+                ],
               ),
             ],
           ),
@@ -129,7 +176,7 @@ class _ScannerPageState extends State<ScannerPage> {
     setState(() {});
   }
 
-  Stream<(DecoderResult?, DecoderDebugInfo)> _scanning() async* {
+  Stream<(DecoderResult?, DecoderDebugInfo?)> _scanning() async* {
     while (true) {
       final result = await Future.delayed(
         Duration(milliseconds: _scanDelayMs),
@@ -137,7 +184,9 @@ class _ScannerPageState extends State<ScannerPage> {
           final stopwatch = Stopwatch()..start();
 
           final image = await _controller!.inMemoryImage();
-          final result = await compute((image) {
+
+          final result = await compute((params) {
+            final (image, isDebugEnabled) = params;
             final lrgb = LrgbMatrix.fromImage(image);
             // final compare = Encoder().encode(
             //     data:
@@ -146,19 +195,18 @@ class _ScannerPageState extends State<ScannerPage> {
             //       compression: Compression(level: 2),
             //       mask: Mask(number: 0),
             //     ));
-            final debugInfo = DecoderDebugInfo(); //..compareWith = compare;
+            final debugInfo = isDebugEnabled
+                ? DecoderDebugInfo()
+                : null; //..compareWith = compare;
 
             try {
-              return (
-                Decoder().decode(lrgb),
-                debugInfo
-              ); //, debugInfo: debugInfo), debugInfo);
+              return (Decoder().decode(lrgb, debugInfo: debugInfo), debugInfo);
             } on Exception catch (e, s) {
               debugPrintStack(stackTrace: s, label: e.toString());
-              print('ERRORS: ${debugInfo.errorCount}');
+              print('ERRORS: ${debugInfo?.errorCount}');
               return (null, debugInfo);
             }
-          }, image, debugLabel: 'AQR scan');
+          }, (image, _isDebugEnabled), debugLabel: 'AQR scan');
 
           stopwatch.stop();
           print('scanned camera for ${stopwatch.elapsedMilliseconds}ms');
@@ -170,11 +218,13 @@ class _ScannerPageState extends State<ScannerPage> {
   }
 
   void _subscribeToScan() {
+    if (_scanSubscription != null) return;
     _scanSubscription = _scanning().listen(_handleScanningResult);
   }
 
   void _unsubscribeToScan() {
     _scanSubscription?.cancel();
+    _scanSubscription = null;
   }
 
   void _scanImage() async {
@@ -196,7 +246,8 @@ class _ScannerPageState extends State<ScannerPage> {
     }
     final stopwatch = Stopwatch()..start();
 
-    final result = await compute((image) {
+    final result = await compute((params) {
+      final (image, isDebugEnabled) = params;
       final lrgb = LrgbMatrix.fromImage(image);
       // final compare = Encoder().encode(
       //     data:
@@ -205,19 +256,17 @@ class _ScannerPageState extends State<ScannerPage> {
       //       compression: Compression(level: 2),
       //       mask: Mask(number: 0),
       //     ));
-      final debugInfo = DecoderDebugInfo(); //..compareWith = compare;
+      final debugInfo =
+          isDebugEnabled ? DecoderDebugInfo() : null; //..compareWith = compare;
 
       try {
-        return (
-          Decoder().decode(lrgb),
-          debugInfo
-        ); //, debugInfo: debugInfo), debugInfo);
+        return (Decoder().decode(lrgb, debugInfo: debugInfo), debugInfo);
       } on Exception catch (e, s) {
         debugPrintStack(stackTrace: s, label: e.toString());
-        print('ERRORS: ${debugInfo.errorCount}');
+        print('ERRORS: ${debugInfo?.errorCount}');
         return (null, debugInfo);
       }
-    }, image, debugLabel: 'AQR scan');
+    }, (image, _isDebugEnabled), debugLabel: 'AQR scan');
     stopwatch.stop();
     print('scanned file for ${stopwatch.elapsedMilliseconds}ms');
 
@@ -247,14 +296,16 @@ class _ScannerPageState extends State<ScannerPage> {
         .setFlashMode(_enableTorch ? FlashMode.torch : FlashMode.off);
   }
 
-  void _handleScanningResult((DecoderResult?, DecoderDebugInfo) event) {
+  void _handleScanningResult((DecoderResult?, DecoderDebugInfo?) event) {
     if (!context.mounted) return;
     if (_isPickingFile) return;
 
     final (result, debugInfo) = (event);
+    final haveResult = result != null;
+    final showDebugInfo = _isDebugEnabled && (haveResult || _shouldDebugFails);
 
-    if (result != null) {
-      Navigator.push(
+    if (haveResult) {
+      final future = Navigator.push(
         context,
         MaterialPageRoute(
           builder: (context) {
@@ -277,9 +328,9 @@ class _ScannerPageState extends State<ScannerPage> {
                         maxLines: null,
                       ),
                     ),
-                    // Text(result.text),
-                    // const VerticalGap(16.0),
-                    // Text('Error count: ${debugInfo.errorCount}'),
+                    const VerticalGap(16.0),
+                    if (_isDebugEnabled)
+                      Text('Error count: ${debugInfo!.errorCount}'),
                   ],
                 ),
               ),
@@ -288,79 +339,79 @@ class _ScannerPageState extends State<ScannerPage> {
         ),
       ).then((_) => _subscribeToScan());
       _unsubscribeToScan();
-      return;
     }
 
-    return;
+    if (!showDebugInfo) return;
 
-    // showModalBottomSheet(
-    //     context: context,
-    //     builder: (context) {
-    //       return FractionallySizedBox(
-    //         widthFactor: 1.0,
-    //         heightFactor: 1.0,
-    //         child: SingleChildScrollView(
-    //           padding: const EdgeInsets.all(16.0),
-    //           child: Column(
-    //             children: [
-    //               if (debugInfo.wbImage != null) ...[
-    //                 const Text('Black and white image:'),
-    //                 Image.memory(imglib.encodePng(debugInfo.wbImage!)),
-    //               ],
-    //               if (debugInfo.wbDetectedImage != null) ...[
-    //                 const Text('Black and white detected image:'),
-    //                 Image.memory(
-    //                   imglib.encodePng(imglib.copyResize(
-    //                     debugInfo.wbDetectedImage!,
-    //                     height: 500,
-    //                     width: 500,
-    //                   )),
-    //                   fit: BoxFit.fitWidth,
-    //                 ),
-    //               ],
-    //               if (debugInfo.detectedImage != null) ...[
-    //                 const Text('Detected image:'),
-    //                 Image.memory(imglib.encodePng(imglib.copyResize(
-    //                   debugInfo.detectedImage!,
-    //                   height: 500,
-    //                   width: 500,
-    //                 ))),
-    //               ],
-    //               if (debugInfo.colorCorrectedImage != null) ...[
-    //                 const Text('Color corrected image:'),
-    //                 Image.memory(imglib.encodePng(imglib.copyResize(
-    //                   debugInfo.colorCorrectedImage!,
-    //                   height: 500,
-    //                   width: 500,
-    //                 ))),
-    //               ],
-    //               if (debugInfo.colorDistributionImage != null) ...[
-    //                 const Text('Color distribution:'),
-    //                 Image.memory(
-    //                     imglib.encodePng(debugInfo.colorDistributionImage!)),
-    //               ],
-    //               if (debugInfo.correctedImage != null) ...[
-    //                 const Text('Corrected image:'),
-    //                 Image.memory(imglib.encodePng(imglib.copyResize(
-    //                   debugInfo.correctedImage!,
-    //                   height: 500,
-    //                   width: 500,
-    //                 ))),
-    //               ],
-    //               if (debugInfo.errorImage != null) ...[
-    //                 const Text('Error image:'),
-    //                 Image.memory(imglib.encodePng(imglib.copyResize(
-    //                   debugInfo.errorImage!,
-    //                   height: 500,
-    //                   width: 500,
-    //                 ))),
-    //               ],
-    //               Text('Error count: ${debugInfo.errorCount}'),
-    //             ],
-    //           ),
-    //         ),
-    //       );
-    //     }).then((_) => _subscribeToScan());
-    // _unsubscribeToScan();
+    final future = showModalBottomSheet(
+        context: context,
+        builder: (context) {
+          return FractionallySizedBox(
+            widthFactor: 1.0,
+            heightFactor: 1.0,
+            child: SingleChildScrollView(
+              padding: const EdgeInsets.all(16.0),
+              child: Column(
+                children: [
+                  if (debugInfo!.wbImage != null) ...[
+                    const Text('Black and white image:'),
+                    Image.memory(imglib.encodePng(debugInfo.wbImage!)),
+                  ],
+                  if (debugInfo.wbDetectedImage != null) ...[
+                    const Text('Black and white detected image:'),
+                    Image.memory(
+                      imglib.encodePng(imglib.copyResize(
+                        debugInfo.wbDetectedImage!,
+                        height: 500,
+                        width: 500,
+                      )),
+                      fit: BoxFit.fitWidth,
+                    ),
+                  ],
+                  if (debugInfo.detectedImage != null) ...[
+                    const Text('Detected image:'),
+                    Image.memory(imglib.encodePng(imglib.copyResize(
+                      debugInfo.detectedImage!,
+                      height: 500,
+                      width: 500,
+                    ))),
+                  ],
+                  if (debugInfo.colorCorrectedImage != null) ...[
+                    const Text('Color corrected image:'),
+                    Image.memory(imglib.encodePng(imglib.copyResize(
+                      debugInfo.colorCorrectedImage!,
+                      height: 500,
+                      width: 500,
+                    ))),
+                  ],
+                  if (debugInfo.colorDistributionImage != null) ...[
+                    const Text('Color distribution:'),
+                    Image.memory(
+                        imglib.encodePng(debugInfo.colorDistributionImage!)),
+                  ],
+                  if (debugInfo.correctedImage != null) ...[
+                    const Text('Corrected image:'),
+                    Image.memory(imglib.encodePng(imglib.copyResize(
+                      debugInfo.correctedImage!,
+                      height: 500,
+                      width: 500,
+                    ))),
+                  ],
+                  if (debugInfo.errorImage != null) ...[
+                    const Text('Error image:'),
+                    Image.memory(imglib.encodePng(imglib.copyResize(
+                      debugInfo.errorImage!,
+                      height: 500,
+                      width: 500,
+                    ))),
+                  ],
+                  Text('Error count: ${debugInfo.errorCount}'),
+                ],
+              ),
+            ),
+          );
+        });
+    if (!haveResult) future.then((_) => _subscribeToScan());
+    _unsubscribeToScan();
   }
 }
