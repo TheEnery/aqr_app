@@ -14,7 +14,7 @@ class UrlTemplateForm extends TemplateForm<UrlTemplate> {
   State<UrlTemplateForm> createState() => _UrlTemplateFormState();
 }
 
-class _UrlTemplateFormState extends State<UrlTemplateForm> {
+class _UrlTemplateFormState extends TemplateFormState<UrlTemplateForm> {
   final urlController = TextEditingController();
   final GlobalKey<FormState> formKey = GlobalKey<FormState>();
 
@@ -31,9 +31,13 @@ class _UrlTemplateFormState extends State<UrlTemplateForm> {
         key: formKey,
         child: Column(
           children: [
+            const VerticalGap(),
             TextFormField(
               controller: urlController,
-              decoration: const InputDecoration(labelText: 'URL'),
+              decoration: const InputDecoration(
+                labelText: 'URL',
+                border: OutlineInputBorder(),
+              ),
               validator: (value) {
                 if (value == null || value.isEmpty) {
                   return 'Please enter your URL';
@@ -41,19 +45,17 @@ class _UrlTemplateFormState extends State<UrlTemplateForm> {
                 return null;
               },
             ),
-            const VerticalGap(16),
-            ElevatedButton(
-              onPressed: () {
-                if (formKey.currentState!.validate()) {
-                  final template = UrlTemplate(urlController.text);
-                  widget.onSubmit(context, template);
-                }
-              },
-              child: const Text('Submit'),
-            ),
           ],
         ),
       ),
     );
+  }
+
+  @override
+  void submit() {
+    if (formKey.currentState!.validate()) {
+      final template = UrlTemplate(urlController.text);
+      widget.onSubmit(context, template);
+    }
   }
 }

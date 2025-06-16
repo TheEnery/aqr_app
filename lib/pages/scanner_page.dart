@@ -12,7 +12,9 @@ import 'package:wakelock_plus/wakelock_plus.dart';
 
 import '../core/camera_controller_extension.dart';
 import '../dummy/loading_widget.dart';
-import '../dummy/vertical_gap.dart';
+import '../widgets/decoder_debug_log.dart';
+
+import 'scanner_result_page_wrapper.dart';
 
 class ScannerPage extends StatefulWidget {
   const ScannerPage({super.key});
@@ -305,36 +307,11 @@ class _ScannerPageState extends State<ScannerPage> {
     final showDebugInfo = _isDebugEnabled && (haveResult || _shouldDebugFails);
 
     if (haveResult) {
-      final future = Navigator.push(
+      Navigator.push(
         context,
         MaterialPageRoute(
           builder: (context) {
-            return Scaffold(
-              appBar: AppBar(),
-              body: Padding(
-                padding: const EdgeInsets.all(16.0),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.center,
-                  children: [
-                    Container(
-                      padding: const EdgeInsets.all(8.0),
-                      width: double.infinity,
-                      decoration: BoxDecoration(
-                        border: Border.all(color: Colors.white),
-                        borderRadius: BorderRadius.circular(8.0),
-                      ),
-                      child: SelectableText(
-                        result.text,
-                        maxLines: null,
-                      ),
-                    ),
-                    const VerticalGap(16.0),
-                    if (_isDebugEnabled)
-                      Text('Error count: ${debugInfo!.errorCount}'),
-                  ],
-                ),
-              ),
-            );
+            return ScannerResultPageWrapper(result: result);
           },
         ),
       ).then((_) => _subscribeToScan());
@@ -346,70 +323,7 @@ class _ScannerPageState extends State<ScannerPage> {
     final future = showModalBottomSheet(
         context: context,
         builder: (context) {
-          return FractionallySizedBox(
-            widthFactor: 1.0,
-            heightFactor: 1.0,
-            child: SingleChildScrollView(
-              padding: const EdgeInsets.all(16.0),
-              child: Column(
-                children: [
-                  if (debugInfo!.wbImage != null) ...[
-                    const Text('Black and white image:'),
-                    Image.memory(imglib.encodePng(debugInfo.wbImage!)),
-                  ],
-                  if (debugInfo.wbDetectedImage != null) ...[
-                    const Text('Black and white detected image:'),
-                    Image.memory(
-                      imglib.encodePng(imglib.copyResize(
-                        debugInfo.wbDetectedImage!,
-                        height: 500,
-                        width: 500,
-                      )),
-                      fit: BoxFit.fitWidth,
-                    ),
-                  ],
-                  if (debugInfo.detectedImage != null) ...[
-                    const Text('Detected image:'),
-                    Image.memory(imglib.encodePng(imglib.copyResize(
-                      debugInfo.detectedImage!,
-                      height: 500,
-                      width: 500,
-                    ))),
-                  ],
-                  if (debugInfo.colorCorrectedImage != null) ...[
-                    const Text('Color corrected image:'),
-                    Image.memory(imglib.encodePng(imglib.copyResize(
-                      debugInfo.colorCorrectedImage!,
-                      height: 500,
-                      width: 500,
-                    ))),
-                  ],
-                  if (debugInfo.colorDistributionImage != null) ...[
-                    const Text('Color distribution:'),
-                    Image.memory(
-                        imglib.encodePng(debugInfo.colorDistributionImage!)),
-                  ],
-                  if (debugInfo.correctedImage != null) ...[
-                    const Text('Corrected image:'),
-                    Image.memory(imglib.encodePng(imglib.copyResize(
-                      debugInfo.correctedImage!,
-                      height: 500,
-                      width: 500,
-                    ))),
-                  ],
-                  if (debugInfo.errorImage != null) ...[
-                    const Text('Error image:'),
-                    Image.memory(imglib.encodePng(imglib.copyResize(
-                      debugInfo.errorImage!,
-                      height: 500,
-                      width: 500,
-                    ))),
-                  ],
-                  Text('Error count: ${debugInfo.errorCount}'),
-                ],
-              ),
-            ),
-          );
+          return DecoderDebugLog(debugInfo: debugInfo!);
         });
     if (!haveResult) future.then((_) => _subscribeToScan());
     _unsubscribeToScan();

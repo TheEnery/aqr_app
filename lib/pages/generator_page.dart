@@ -91,7 +91,10 @@ class _GeneratorPageState extends State<GeneratorPage> {
               context,
               MaterialPageRoute(
                 builder: (context) => TemplateFormWrapper(
-                  builder: (context) => TextToAqrForm(onSubmit: make),
+                  builder: (context, key) => TextToAqrForm(
+                    key: key,
+                    onSubmit: make,
+                  ),
                   name: 'Text',
                 ),
               ),
@@ -127,7 +130,8 @@ class _GeneratorPageState extends State<GeneratorPage> {
                   context,
                   MaterialPageRoute(
                     builder: (context) => TemplateFormWrapper(
-                      builder: (context) => CalendarEventForm(
+                      builder: (context, key) => CalendarEventForm(
+                        key: key,
                         onSubmit: onTemplateFormSubmit,
                       ),
                       name: 'Calendar event',
@@ -144,8 +148,10 @@ class _GeneratorPageState extends State<GeneratorPage> {
                   context,
                   MaterialPageRoute(
                     builder: (context) => TemplateFormWrapper(
-                      builder: (context) => ContactInfoTemplateForm(
-                          onSubmit: onTemplateFormSubmit),
+                      builder: (context, key) => ContactInfoTemplateForm(
+                        key: key,
+                        onSubmit: onTemplateFormSubmit,
+                      ),
                       name: 'Contact info',
                     ),
                   ),
@@ -160,7 +166,8 @@ class _GeneratorPageState extends State<GeneratorPage> {
                   context,
                   MaterialPageRoute(
                     builder: (context) => TemplateFormWrapper(
-                      builder: (context) => EmailTemplateForm(
+                      builder: (context, key) => EmailTemplateForm(
+                        key: key,
                         onSubmit: onTemplateFormSubmit,
                       ),
                       name: 'Email',
@@ -177,8 +184,10 @@ class _GeneratorPageState extends State<GeneratorPage> {
                   context,
                   MaterialPageRoute(
                     builder: (context) => TemplateFormWrapper(
-                      builder: (context) => GeolocationTemplateForm(
-                          onSubmit: onTemplateFormSubmit),
+                      builder: (context, key) => GeolocationTemplateForm(
+                        key: key,
+                        onSubmit: onTemplateFormSubmit,
+                      ),
                       name: 'Geolocation',
                     ),
                   ),
@@ -193,8 +202,10 @@ class _GeneratorPageState extends State<GeneratorPage> {
                   context,
                   MaterialPageRoute(
                     builder: (context) => TemplateFormWrapper(
-                      builder: (context) => PhoneNumberTemplateForm(
-                          onSubmit: onTemplateFormSubmit),
+                      builder: (context, key) => PhoneNumberTemplateForm(
+                        key: key,
+                        onSubmit: onTemplateFormSubmit,
+                      ),
                       name: 'Phone number',
                     ),
                   ),
@@ -209,8 +220,10 @@ class _GeneratorPageState extends State<GeneratorPage> {
                   context,
                   MaterialPageRoute(
                     builder: (context) => TemplateFormWrapper(
-                      builder: (context) =>
-                          SmsTemplateForm(onSubmit: onTemplateFormSubmit),
+                      builder: (context, key) => SmsTemplateForm(
+                        key: key,
+                        onSubmit: onTemplateFormSubmit,
+                      ),
                       name: 'SMS',
                     ),
                   ),
@@ -225,8 +238,10 @@ class _GeneratorPageState extends State<GeneratorPage> {
                   context,
                   MaterialPageRoute(
                     builder: (context) => TemplateFormWrapper(
-                      builder: (context) =>
-                          UrlTemplateForm(onSubmit: onTemplateFormSubmit),
+                      builder: (context, key) => UrlTemplateForm(
+                        key: key,
+                        onSubmit: onTemplateFormSubmit,
+                      ),
                       name: 'URL',
                     ),
                   ),
@@ -241,8 +256,10 @@ class _GeneratorPageState extends State<GeneratorPage> {
                   context,
                   MaterialPageRoute(
                     builder: (context) => TemplateFormWrapper(
-                      builder: (context) =>
-                          WifiTemplateForm(onSubmit: onTemplateFormSubmit),
+                      builder: (context, key) => WifiTemplateForm(
+                        key: key,
+                        onSubmit: onTemplateFormSubmit,
+                      ),
                       name: 'Wi-Fi',
                     ),
                   ),

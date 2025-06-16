@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import 'package:aqr_app/dummy/vertical_gap.dart';
+import 'package:aqr_app/widgets/template_form.dart';
 
 class TextToAqrForm extends StatefulWidget {
   const TextToAqrForm({super.key, required this.onSubmit});
@@ -11,7 +12,7 @@ class TextToAqrForm extends StatefulWidget {
   State<TextToAqrForm> createState() => _TextToAqrFormState();
 }
 
-class _TextToAqrFormState extends State<TextToAqrForm> {
+class _TextToAqrFormState extends TemplateFormState<TextToAqrForm> {
   final textController = TextEditingController();
 
   @override
@@ -26,24 +27,25 @@ class _TextToAqrFormState extends State<TextToAqrForm> {
       child: Form(
         child: Column(
           children: [
+            const VerticalGap(),
             TextFormField(
               controller: textController,
-              decoration: const InputDecoration(labelText: 'Text'),
-              validator: (value) {
-                if (value == null || value.isEmpty) {
-                  return 'Please enter the text';
-                }
-                return null;
-              },
-            ),
-            const VerticalGap(16.0),
-            ElevatedButton(
-              onPressed: () => widget.onSubmit(context, textController.text),
-              child: const Text('Submit'),
+              decoration: const InputDecoration(
+                labelText: 'Some characters to encode',
+                border: OutlineInputBorder(),
+                alignLabelWithHint: true,
+              ),
+              minLines: 3,
+              maxLines: 20,
             ),
           ],
         ),
       ),
     );
+  }
+
+  @override
+  void submit() {
+    widget.onSubmit(context, textController.text);
   }
 }

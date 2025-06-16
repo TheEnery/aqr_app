@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:aqr_lib/template_parsers.dart';
 import 'package:aqr_lib/templates.dart';
 
+import '../dummy/vertical_gap.dart';
 import '../widgets/template_form.dart';
 
 class GeolocationTemplateForm extends TemplateForm<GeolocationTemplate> {
@@ -14,7 +15,8 @@ class GeolocationTemplateForm extends TemplateForm<GeolocationTemplate> {
       _GeolocationTemplateFormState();
 }
 
-class _GeolocationTemplateFormState extends State<GeolocationTemplateForm> {
+class _GeolocationTemplateFormState
+    extends TemplateFormState<GeolocationTemplateForm> {
   final latitudeController = TextEditingController();
   final longitudeController = TextEditingController();
   final altitudeController = TextEditingController();
@@ -37,40 +39,54 @@ class _GeolocationTemplateFormState extends State<GeolocationTemplateForm> {
         key: formKey,
         child: Column(
           children: [
+            const VerticalGap(),
             TextFormField(
               controller: latitudeController,
-              decoration: const InputDecoration(labelText: 'Latitude'),
+              decoration: const InputDecoration(
+                labelText: 'Latitude',
+                border: OutlineInputBorder(),
+              ),
             ),
+            const VerticalGap(),
             TextFormField(
               controller: longitudeController,
-              decoration: const InputDecoration(labelText: 'Longitude'),
+              decoration: const InputDecoration(
+                labelText: 'Longitude',
+                border: OutlineInputBorder(),
+              ),
             ),
+            const VerticalGap(),
             TextFormField(
               controller: altitudeController,
-              decoration: const InputDecoration(labelText: 'Altitude'),
+              decoration: const InputDecoration(
+                labelText: 'Altitude',
+                border: OutlineInputBorder(),
+              ),
             ),
+            const VerticalGap(),
             TextFormField(
               controller: queryController,
-              decoration: const InputDecoration(labelText: 'Query'),
-            ),
-            const SizedBox(height: 16),
-            ElevatedButton(
-              onPressed: () {
-                if (formKey.currentState!.validate()) {
-                  final template = GeolocationTemplate(
-                    double.parse(latitudeController.text),
-                    double.parse(longitudeController.text),
-                    double.parse(altitudeController.text),
-                    queryController.text,
-                  );
-                  widget.onSubmit(context, template);
-                }
-              },
-              child: const Text('Submit'),
+              decoration: const InputDecoration(
+                labelText: 'Query',
+                border: OutlineInputBorder(),
+              ),
             ),
           ],
         ),
       ),
     );
+  }
+
+  @override
+  void submit() {
+    if (formKey.currentState!.validate()) {
+      final template = GeolocationTemplate(
+        double.parse(latitudeController.text),
+        double.parse(longitudeController.text),
+        double.parse(altitudeController.text),
+        queryController.text,
+      );
+      widget.onSubmit(context, template);
+    }
   }
 }

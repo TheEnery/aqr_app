@@ -3,6 +3,8 @@ import 'package:flutter/material.dart';
 import 'package:aqr_lib/template_parsers.dart';
 import 'package:aqr_lib/templates.dart';
 
+import 'package:aqr_app/dummy/vertical_gap.dart';
+
 import '../widgets/template_form.dart';
 
 class PhoneNumberTemplateForm extends TemplateForm<PhoneNumberTemplate> {
@@ -14,7 +16,8 @@ class PhoneNumberTemplateForm extends TemplateForm<PhoneNumberTemplate> {
       _PhoneNumberTemplateFormState();
 }
 
-class _PhoneNumberTemplateFormState extends State<PhoneNumberTemplateForm> {
+class _PhoneNumberTemplateFormState
+    extends TemplateFormState<PhoneNumberTemplateForm> {
   final phoneNumberController = TextEditingController();
   final GlobalKey<FormState> formKey = GlobalKey<FormState>();
 
@@ -31,9 +34,13 @@ class _PhoneNumberTemplateFormState extends State<PhoneNumberTemplateForm> {
         key: formKey,
         child: Column(
           children: [
+            const VerticalGap(),
             TextFormField(
               controller: phoneNumberController,
-              decoration: const InputDecoration(labelText: 'Phone number'),
+              decoration: const InputDecoration(
+                labelText: 'Phone number',
+                border: OutlineInputBorder(),
+              ),
               validator: (value) {
                 if (value == null || value.isEmpty) {
                   return 'Please enter your phone number';
@@ -41,20 +48,18 @@ class _PhoneNumberTemplateFormState extends State<PhoneNumberTemplateForm> {
                 return null;
               },
             ),
-            const SizedBox(height: 16),
-            ElevatedButton(
-              onPressed: () {
-                if (formKey.currentState!.validate()) {
-                  final template = PhoneNumberTemplate(
-                      phoneNumberController.text, null, null);
-                  widget.onSubmit(context, template);
-                }
-              },
-              child: const Text('Submit'),
-            ),
           ],
         ),
       ),
     );
+  }
+
+  @override
+  void submit() {
+    if (formKey.currentState!.validate()) {
+      final template =
+          PhoneNumberTemplate(phoneNumberController.text, null, null);
+      widget.onSubmit(context, template);
+    }
   }
 }

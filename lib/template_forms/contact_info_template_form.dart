@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:aqr_lib/template_parsers.dart';
 import 'package:aqr_lib/templates.dart';
 
+import '../dummy/vertical_gap.dart';
 import '../widgets/template_form.dart';
 
 class ContactInfoTemplateForm extends TemplateForm<ContactInfoTemplate> {
@@ -14,7 +15,8 @@ class ContactInfoTemplateForm extends TemplateForm<ContactInfoTemplate> {
       _ContactInfoTemplateFormState();
 }
 
-class _ContactInfoTemplateFormState extends State<ContactInfoTemplateForm> {
+class _ContactInfoTemplateFormState
+    extends TemplateFormState<ContactInfoTemplateForm> {
   final nameController = TextEditingController();
   final phoneNumberController = TextEditingController();
   final emailController = TextEditingController();
@@ -39,45 +41,63 @@ class _ContactInfoTemplateFormState extends State<ContactInfoTemplateForm> {
         key: formKey,
         child: Column(
           children: [
+            const VerticalGap(),
             TextFormField(
               controller: nameController,
-              decoration: const InputDecoration(labelText: 'Name'),
+              decoration: const InputDecoration(
+                labelText: 'Name',
+                border: OutlineInputBorder(),
+              ),
             ),
+            const VerticalGap(),
             TextFormField(
               controller: phoneNumberController,
-              decoration: const InputDecoration(labelText: 'Phone Number'),
+              decoration: const InputDecoration(
+                labelText: 'Phone Number',
+                border: OutlineInputBorder(),
+              ),
             ),
+            const VerticalGap(),
             TextFormField(
               controller: emailController,
-              decoration: const InputDecoration(labelText: 'Email'),
+              decoration: const InputDecoration(
+                labelText: 'Email',
+                border: OutlineInputBorder(),
+              ),
             ),
+            const VerticalGap(),
             TextFormField(
               controller: addressController,
-              decoration: const InputDecoration(labelText: 'Address'),
+              decoration: const InputDecoration(
+                labelText: 'Address',
+                border: OutlineInputBorder(),
+              ),
             ),
+            const VerticalGap(),
             TextFormField(
               controller: noteController,
-              decoration: const InputDecoration(labelText: 'Note'),
-            ),
-            const SizedBox(height: 16),
-            ElevatedButton(
-              onPressed: () {
-                if (formKey.currentState!.validate()) {
-                  final template = ContactInfoTemplate(
-                    names: [nameController.text],
-                    phoneNumbers: [phoneNumberController.text],
-                    emails: [emailController.text],
-                    note: noteController.text,
-                    addresses: [addressController.text],
-                  );
-                  widget.onSubmit(context, template);
-                }
-              },
-              child: const Text('Submit'),
+              decoration: const InputDecoration(
+                labelText: 'Note',
+                border: OutlineInputBorder(),
+              ),
             ),
           ],
         ),
       ),
     );
+  }
+
+  @override
+  void submit() {
+    if (formKey.currentState!.validate()) {
+      final template = ContactInfoTemplate(
+        names: [nameController.text],
+        phoneNumbers: [phoneNumberController.text],
+        emails: [emailController.text],
+        note: noteController.text,
+        addresses: [addressController.text],
+      );
+      widget.onSubmit(context, template);
+    }
   }
 }

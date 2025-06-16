@@ -14,7 +14,7 @@ class EmailTemplateForm extends TemplateForm<EmailTemplate> {
   State<EmailTemplateForm> createState() => _EmailTemplateFormState();
 }
 
-class _EmailTemplateFormState extends State<EmailTemplateForm> {
+class _EmailTemplateFormState extends TemplateFormState<EmailTemplateForm> {
   static const emailPattern =
       r'^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$';
 
@@ -34,9 +34,13 @@ class _EmailTemplateFormState extends State<EmailTemplateForm> {
         key: formKey,
         child: Column(
           children: [
+            const VerticalGap(),
             TextFormField(
               controller: emailController,
-              decoration: const InputDecoration(labelText: 'Email'),
+              decoration: const InputDecoration(
+                labelText: 'Email',
+                border: OutlineInputBorder(),
+              ),
               validator: (value) {
                 if (value == null || value.isEmpty) {
                   return 'Please enter your email';
@@ -47,19 +51,17 @@ class _EmailTemplateFormState extends State<EmailTemplateForm> {
                 return null;
               },
             ),
-            const VerticalGap(16),
-            ElevatedButton(
-              onPressed: () {
-                if (formKey.currentState!.validate()) {
-                  final template = EmailTemplate(emailController.text);
-                  widget.onSubmit(context, template);
-                }
-              },
-              child: const Text('Submit'),
-            ),
           ],
         ),
       ),
     );
+  }
+
+  @override
+  void submit() {
+    if (formKey.currentState!.validate()) {
+      final template = EmailTemplate(emailController.text);
+      widget.onSubmit(context, template);
+    }
   }
 }

@@ -14,7 +14,7 @@ class WifiTemplateForm extends TemplateForm<WifiTemplate> {
   State<WifiTemplateForm> createState() => _WifiTemplateFormState();
 }
 
-class _WifiTemplateFormState extends State<WifiTemplateForm> {
+class _WifiTemplateFormState extends TemplateFormState<WifiTemplateForm> {
   static const typeOptions = [
     'None',
     'WEP',
@@ -40,6 +40,7 @@ class _WifiTemplateFormState extends State<WifiTemplateForm> {
       child: Form(
         child: Column(
           children: [
+            const VerticalGap(),
             DropdownButtonFormField(
               items: typeOptions
                   .map((o) => DropdownMenuItem(
@@ -50,11 +51,18 @@ class _WifiTemplateFormState extends State<WifiTemplateForm> {
               onChanged: (o) =>
                   setState(() => typeOption = o ?? typeOptions[0]),
               value: typeOption,
-              decoration: const InputDecoration(labelText: 'Type'),
+              decoration: const InputDecoration(
+                labelText: 'Type',
+                border: OutlineInputBorder(),
+              ),
             ),
+            const VerticalGap(),
             TextFormField(
               controller: ssidController,
-              decoration: const InputDecoration(labelText: 'SSID'),
+              decoration: const InputDecoration(
+                labelText: 'SSID',
+                border: OutlineInputBorder(),
+              ),
               validator: (value) {
                 if (value == null || value.isEmpty) {
                   return 'Please enter the SSID';
@@ -62,33 +70,39 @@ class _WifiTemplateFormState extends State<WifiTemplateForm> {
                 return null;
               },
             ),
+            const VerticalGap(),
             TextFormField(
               controller: passwordController,
-              decoration: const InputDecoration(labelText: 'Password'),
+              decoration: const InputDecoration(
+                labelText: 'Password',
+                border: OutlineInputBorder(),
+              ),
             ),
+            const VerticalGap(),
             CheckboxListTile(
               value: hiddenValue,
+              shape: OutlineInputBorder(
+                  borderSide: BorderSide(color: Colors.grey[500]!)),
               onChanged: (value) =>
                   setState(() => hiddenValue = value ?? false),
               title: const Text('Hidden'),
-              contentPadding: const EdgeInsets.all(0.0),
-            ),
-            const VerticalGap(16),
-            ElevatedButton(
-              onPressed: () {
-                final template = WifiTemplate(
-                  ssidController.text,
-                  passwordController.text,
-                  typeOption,
-                  hiddenValue,
-                );
-                widget.onSubmit(context, template);
-              },
-              child: const Text('Submit'),
+              contentPadding:
+                  const EdgeInsets.symmetric(vertical: 0.0, horizontal: 12.0),
             ),
           ],
         ),
       ),
     );
+  }
+
+  @override
+  void submit() {
+    final template = WifiTemplate(
+      ssidController.text,
+      passwordController.text,
+      typeOption,
+      hiddenValue,
+    );
+    widget.onSubmit(context, template);
   }
 }

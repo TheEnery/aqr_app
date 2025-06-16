@@ -10,3 +10,9 @@ abstract class TemplateForm<T extends Template> extends StatefulWidget {
 
   const TemplateForm({super.key, required this.parser, required this.onSubmit});
 }
+
+// TODO: remove this workaround
+abstract class TemplateFormState<
+    T /*extends TemplateForm*/ extends StatefulWidget> extends State<T> {
+  void submit();
+}
