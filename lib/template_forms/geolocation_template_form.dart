@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 
 import 'package:aqr_lib/template_parsers.dart';
 import 'package:aqr_lib/templates.dart';
+import 'package:flutter_map/flutter_map.dart';
+import 'package:latlong2/latlong.dart';
 
 import '../dummy/vertical_gap.dart';
 import '../widgets/template_form.dart';
@@ -17,11 +19,30 @@ class GeolocationTemplateForm extends TemplateForm<GeolocationTemplate> {
 
 class _GeolocationTemplateFormState
     extends TemplateFormState<GeolocationTemplateForm> {
-  final latitudeController = TextEditingController();
-  final longitudeController = TextEditingController();
+  final latitudeController = TextEditingController()..text = '49.8360';
+  final longitudeController = TextEditingController()..text = '24.0145';
   final altitudeController = TextEditingController();
   final queryController = TextEditingController();
-  final GlobalKey<FormState> formKey = GlobalKey<FormState>();
+  final formKey = GlobalKey<FormState>();
+  final mapController = MapController();
+
+  set position(LatLng ll) {
+    setState(() {
+      latitudeController.text = ll.latitude.toString();
+      longitudeController.text = ll.longitude.toString();
+    });
+  }
+
+  LatLng get position {
+    return LatLng(
+      double.tryParse(latitudeController.text) ?? 0.0,
+      double.tryParse(longitudeController.text) ?? 0.0,
+    );
+  }
+
+  void updateMapCenter() {
+    mapController.move(position, 13);
+  }
 
   @override
   void dispose() {
@@ -29,6 +50,8 @@ class _GeolocationTemplateFormState
     longitudeController.dispose();
     altitudeController.dispose();
     queryController.dispose();
+    mapController.dispose();
+
     super.dispose();
   }
 
@@ -46,6 +69,20 @@ class _GeolocationTemplateFormState
                 labelText: 'Latitude',
                 border: OutlineInputBorder(),
               ),
+              onChanged: (value) {
+                if (value.isNotEmpty) {
+                  setState(updateMapCenter);
+                }
+              },
+              validator: (value) {
+                if (value == null || value.isEmpty) {
+                  return 'Please enter the latitude';
+                }
+                if (double.tryParse(value) == null) {
+                  return 'Please enter the valid value';
+                }
+                return null;
+              },
             ),
             const VerticalGap(),
             TextFormField(
@@ -54,6 +91,20 @@ class _GeolocationTemplateFormState
                 labelText: 'Longitude',
                 border: OutlineInputBorder(),
               ),
+              onChanged: (value) {
+                if (value.isNotEmpty) {
+                  setState(updateMapCenter);
+                }
+              },
+              validator: (value) {
+                if (value == null || value.isEmpty) {
+                  return 'Please enter the longitude';
+                }
+                if (double.tryParse(value) == null) {
+                  return 'Please enter the valid value';
+                }
+                return null;
+              },
             ),
             const VerticalGap(),
             TextFormField(
@@ -62,6 +113,14 @@ class _GeolocationTemplateFormState
                 labelText: 'Altitude',
                 border: OutlineInputBorder(),
               ),
+              validator: (value) {
+                if (value != null &&
+                    value.isNotEmpty &&
+                    double.tryParse(value) == null) {
+                  return 'Please enter the valid value';
+                }
+                return null;
+              },
             ),
             const VerticalGap(),
             TextFormField(
@@ -69,6 +128,43 @@ class _GeolocationTemplateFormState
               decoration: const InputDecoration(
                 labelText: 'Query',
                 border: OutlineInputBorder(),
+              ),
+            ),
+            const VerticalGap(),
+            SizedBox(
+              height: 500.0,
+              child: FlutterMap(
+                mapController: mapController,
+                options: MapOptions(
+                  initialCenter: position,
+                  initialZoom: 13,
+                  onTap: (tapPosition, latlng) {
+                    position = latlng;
+                  },
+                  interactionOptions: const InteractionOptions(
+                    flags: InteractiveFlag.all & ~InteractiveFlag.rotate,
+                  ),
+                ),
+                children: [
+                  TileLayer(
+                    urlTemplate:
+                        'https://tile.openstreetmap.org/{z}/{x}/{y}.png',
+                  ),
+                  MarkerLayer(
+                    markers: [
+                      Marker(
+                        point: position,
+                        width: 40,
+                        height: 40,
+                        child: const Icon(
+                          Icons.location_on,
+                          color: Colors.red,
+                          size: 40,
+                        ),
+                      ),
+                    ],
+                  ),
+                ],
               ),
             ),
           ],
@@ -83,7 +179,9 @@ class _GeolocationTemplateFormState
       final template = GeolocationTemplate(
         double.parse(latitudeController.text),
         double.parse(longitudeController.text),
-        double.parse(altitudeController.text),
+        (altitudeController.text.isNotEmpty)
+            ? double.parse(altitudeController.text)
+            : 0,
         queryController.text,
       );
       widget.onSubmit(context, template);

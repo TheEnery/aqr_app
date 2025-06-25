@@ -2,10 +2,9 @@ import 'package:flutter/material.dart';
 
 import 'package:aqr_lib/core.dart';
 import 'package:aqr_lib/encoder.dart';
-import 'package:file_picker/file_picker.dart';
-import 'package:image/image.dart' as imglib;
 
 import 'package:aqr_app/pages/constructor_page.dart';
+import 'package:aqr_app/pages/generator_result_page.dart';
 
 import '../template_forms/calendar_event_form.dart';
 import '../template_forms/contact_info_template_form.dart';
@@ -285,7 +284,7 @@ class _GeneratorPageState extends State<GeneratorPage> {
       ),
     );
 
-    showResult(context, symbol);
+    showResult(context, symbol, segments.map((e) => e.content).join());
   }
 
   void make(BuildContext context, String text) {
@@ -297,41 +296,48 @@ class _GeneratorPageState extends State<GeneratorPage> {
       ),
     );
 
-    showResult(context, symbol);
+    showResult(context, symbol, text);
   }
 
-  void showResult(BuildContext context, AqrCode symbol) {
-    final image = symbol.draw();
-    final bytes =
-        imglib.encodePng(imglib.copyResize(image, width: 500, height: 500));
-
-    showModalBottomSheet(
-      context: context,
-      shape: const Border(),
-      builder: (context) => SingleChildScrollView(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.start,
-          children: [
-            Padding(
-              padding: const EdgeInsets.all(8.0),
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.end,
-                children: [
-                  IconButton(
-                      onPressed: () async {
-                        await FilePicker.platform.saveFile(
-                            fileName: 'aqr.png',
-                            allowedExtensions: ['png'],
-                            bytes: bytes);
-                      },
-                      icon: const Icon(Icons.save_alt))
-                ],
-              ),
-            ),
-            Image.memory(bytes),
-          ],
-        ),
+  void showResult(BuildContext context, AqrCode symbol, String raw) {
+    Navigator.of(context).push(
+      MaterialPageRoute(
+        builder: (context) =>
+            GeneratorResultPage(title: 'AQR', aqr: symbol, raw: raw),
       ),
     );
+
+    // final image = symbol.draw();
+    // final bytes =
+    //     imglib.encodePng(imglib.copyResize(image, width: 500, height: 500));
+
+    // showModalBottomSheet(
+    //   context: context,
+    //   shape: const Border(),
+    //   builder: (context) => SingleChildScrollView(
+    //     child: Column(
+    //       mainAxisAlignment: MainAxisAlignment.start,
+    //       children: [
+    //         Padding(
+    //           padding: const EdgeInsets.all(8.0),
+    //           child: Row(
+    //             mainAxisAlignment: MainAxisAlignment.end,
+    //             children: [
+    //               IconButton(
+    //                   onPressed: () async {
+    //                     await FilePicker.platform.saveFile(
+    //                         fileName: 'aqr.png',
+    //                         allowedExtensions: ['png'],
+    //                         bytes: bytes);
+    //                   },
+    //                   icon: const Icon(Icons.save_alt))
+    //             ],
+    //           ),
+    //         ),
+    //         Image.memory(bytes),
+    //       ],
+    //     ),
+    //   ),
+    // );
   }
 }
